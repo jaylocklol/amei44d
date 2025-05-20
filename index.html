@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIWOR.ICU</title>
+    <title>IP Checker</title>
     <style>
         :root {
             --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -15,10 +15,8 @@
             --table-border: #eee;
             --table-text: #555;
             --censored-bg: #f0f0f0;
-            --settings-bg: rgba(255, 255, 255, 0.98);
+            --settings-bg: rgba(255, 255, 255, 0.95);
             --settings-text: #333;
-            --search-bg: rgba(255, 255, 255, 0.9);
-            --search-border: #ddd;
         }
         
         .dark-mode {
@@ -31,10 +29,8 @@
             --table-border: #334155;
             --table-text: #e2e8f0;
             --censored-bg: #334155;
-            --settings-bg: rgba(23, 42, 70, 0.98);
+            --settings-bg: rgba(30, 41, 59, 0.95);
             --settings-text: #f0f0f0;
-            --search-bg: rgba(30, 41, 59, 0.9);
-            --search-border: #4a5568;
         }
         
         body {
@@ -79,53 +75,12 @@
             transition: background 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .ip-table th {
             background: var(--table-header-bg);
-            padding: 10px 15px;
-        }
-        
-        .table-title {
             color: var(--table-header-color);
+            padding: 15px;
+            text-align: left;
             font-weight: 500;
-            margin: 0;
-        }
-        
-        .search-container {
-            position: relative;
-            width: 150px;
-            transition: width 0.3s ease;
-        }
-        
-        .search-container:focus-within {
-            width: 180px;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 6px 30px 6px 10px;
-            border-radius: 20px;
-            border: 1px solid var(--search-border);
-            background: var(--search-bg);
-            color: var(--text-color);
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
-        }
-        
-        .search-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-color);
-            pointer-events: none;
         }
         
         .ip-table td {
@@ -176,14 +131,12 @@
         
         .dark-mode-toggle:hover, .settings-toggle:hover {
             transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .dark-mode-toggle svg, .settings-toggle svg {
             width: 20px;
             height: 20px;
             fill: var(--text-color);
-            transition: fill 0.3s ease;
         }
         
         .ip-address {
@@ -217,75 +170,42 @@
             bottom: 0;
             background: var(--settings-bg);
             color: var(--settings-text);
-            padding: 30px;
+            padding: 20px;
             z-index: 100;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
             overflow-y: auto;
-            backdrop-filter: blur(5px);
         }
         
         .settings-panel.open {
-            opacity: 1;
             transform: translateY(0);
         }
         
-        .settings-content {
-            max-width: 500px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            position: relative;
-            border: 1px solid var(--table-border);
-        }
-        
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--table-border);
-        }
-        
-        .settings-title {
-            margin: 0;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .dark-mode .settings-title {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+        .settings-panel h2 {
+            margin-top: 0;
+            text-align: center;
         }
         
         .settings-group {
-            margin-bottom: 25px;
-            background: linear-gradient(to bottom, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid var(--table-border);
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
         }
         
         .settings-group h3 {
             margin-top: 0;
-            margin-bottom: 18px;
-            font-size: 1.1rem;
-            color: var(--text-color);
+            margin-bottom: 15px;
         }
         
         .setting-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed var(--table-border);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--table-border);
         }
         
         .setting-item:last-child {
@@ -298,7 +218,7 @@
             position: relative;
             display: inline-block;
             width: 50px;
-            height: 26px;
+            height: 24px;
         }
         
         .switch input {
@@ -316,41 +236,38 @@
             bottom: 0;
             background-color: #ccc;
             transition: .4s;
-            border-radius: 34px;
+            border-radius: 24px;
         }
         
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
         }
         
         input:checked + .slider {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #667eea;
         }
         
         input:checked + .slider:before {
-            transform: translateX(24px);
+            transform: translateX(26px);
         }
         
         .close-settings {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             background: none;
             border: none;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             cursor: pointer;
             color: var(--settings-text);
-            transition: transform 0.3s ease;
-            padding: 5px;
-        }
-        
-        .close-settings:hover {
-            transform: rotate(90deg);
         }
         
         @keyframes fadeIn {
@@ -388,22 +305,6 @@
             .dark-mode-toggle {
                 right: 60px;
             }
-            
-            .settings-panel {
-                padding: 15px;
-            }
-            
-            .settings-content {
-                padding: 20px;
-            }
-            
-            .search-container {
-                width: 120px;
-            }
-            
-            .search-container:focus-within {
-                width: 140px;
-            }
         }
     </style>
 </head>
@@ -425,18 +326,7 @@
         <table class="ip-table" id="ipTable">
             <thead>
                 <tr>
-                    <th colspan="2">
-                        <div class="table-header">
-                            <h2 class="table-title">Connection Information</h2>
-                            <div class="search-container">
-                                <input type="text" class="search-input" id="ipSearch" placeholder="Search IP..." />
-                                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </div>
-                        </div>
-                    </th>
+                    <th colspan="2">Connection Information</th>
                 </tr>
             </thead>
             <tbody>
@@ -484,88 +374,84 @@
     </div>
     
     <div class="settings-panel" id="settingsPanel">
-        <div class="settings-content">
-            <div class="settings-header">
-                <h2 class="settings-title">Settings</h2>
-                <button class="close-settings" id="closeSettings">&times;</button>
+        <button class="close-settings" id="closeSettings">&times;</button>
+        <h2>Settings</h2>
+        
+        <div class="settings-group">
+            <h3>Privacy Settings</h3>
+            <div class="setting-item">
+                <label for="publicMode">Public Mode (show IP by default)</label>
+                <label class="switch">
+                    <input type="checkbox" id="publicMode">
+                    <span class="slider"></span>
+                </label>
             </div>
-            
-            <div class="settings-group">
-                <h3>Privacy Settings</h3>
-                <div class="setting-item">
-                    <label for="publicMode">Public Mode (show IP by default)</label>
-                    <label class="switch">
-                        <input type="checkbox" id="publicMode">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+        </div>
+        
+        <div class="settings-group">
+            <h3>Display Options</h3>
+            <div class="setting-item">
+                <label for="showIP">Show IP Address</label>
+                <label class="switch">
+                    <input type="checkbox" id="showIP" checked>
+                    <span class="slider"></span>
+                </label>
             </div>
-            
-            <div class="settings-group">
-                <h3>Display Options</h3>
-                <div class="setting-item">
-                    <label for="showIP">Show IP Address</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showIP" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showCountry">Show Country</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showCountry" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showFlag">Show Flag</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showFlag" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showCity">Show City</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showCity" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showRegion">Show Region</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showRegion" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showISP">Show ISP</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showISP" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showASN">Show ASN</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showASN">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showContinent">Show Continent</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showContinent">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <label for="showCountryCode">Show Country Code</label>
-                    <label class="switch">
-                        <input type="checkbox" id="showCountryCode">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+            <div class="setting-item">
+                <label for="showCountry">Show Country</label>
+                <label class="switch">
+                    <input type="checkbox" id="showCountry" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showFlag">Show Flag</label>
+                <label class="switch">
+                    <input type="checkbox" id="showFlag" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showCity">Show City</label>
+                <label class="switch">
+                    <input type="checkbox" id="showCity" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showRegion">Show Region</label>
+                <label class="switch">
+                    <input type="checkbox" id="showRegion" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showISP">Show ISP</label>
+                <label class="switch">
+                    <input type="checkbox" id="showISP" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showASN">Show ASN</label>
+                <label class="switch">
+                    <input type="checkbox" id="showASN">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showContinent">Show Continent</label>
+                <label class="switch">
+                    <input type="checkbox" id="showContinent">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label for="showCountryCode">Show Country Code</label>
+                <label class="switch">
+                    <input type="checkbox" id="showCountryCode">
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
     </div>
@@ -730,91 +616,72 @@
             }
             
             // Fetch IP data
-            function fetchIPData(ip = '') {
-                const loadingText = document.getElementById('locationText');
-                loadingText.textContent = 'Loading...';
-                
-                fetch(`https://nyanc4tt.xyz/api/iplookup?ip=${ip}`)
-                    .then(response => response.json())
-                    .then(ipData => {
-                        // Update IP address
-                        ipAddressElement.textContent = ipData.ip;
-                        
-                        // Update the table data
-                        const countryCode = ipData.country_code.toUpperCase();
-                        document.getElementById('countryFlag').src = 
-                            `https://surfshark.com/website/_next/public/global/flags/${countryCode}.svg`;
-                        document.getElementById('countryName').textContent = ipData.country;
-                        document.getElementById('flagEmoji').textContent = ipData.flag_emoji;
-                        document.getElementById('city').textContent = ipData.city;
-                        document.getElementById('region').textContent = ipData.region;
-                        document.getElementById('isp').textContent = ipData.isp;
-                        document.getElementById('asn').textContent = ipData.asn;
-                        document.getElementById('continent').textContent = ipData.continent;
-                        document.getElementById('countryCode').textContent = ipData.country_code;
-                        
-                        // Fetch CSV greetings data
-                        return fetch('https://q94f.glitch.me/greetings.csv')
-                            .then(response => response.text())
-                            .then(csvText => {
-                                const greetingsData = parseCSV(csvText);
-                                
-                                // Find all greetings for the country flag
-                                const countryGreetings = greetingsData.filter(
-                                    item => item.flag === ipData.flag_emoji
-                                );
-                                
-                                // Select greeting
-                                let greeting = "Hello";
-                                let wavingEmoji = "👋";
-                                
-                                if (countryGreetings.length > 0) {
-                                    // Pick random greeting if multiple exist
-                                    const randomGreeting = countryGreetings[
-                                        Math.floor(Math.random() * countryGreetings.length)
-                                    ];
-                                    greeting = randomGreeting.greeting;
-                                }
-                                
-                                // Update location text with greeting and emojis
-                                const locationText = document.getElementById('locationText');
-                                locationText.innerHTML = `
-                                    ${greeting} ${wavingEmoji}, 
-                                    We see you are in ${ipData.city}, ${ipData.country} ${ipData.flag_emoji}
-                                `;
-                            });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                        document.getElementById('locationText').textContent = 
-                            'Error loading data. Please try another IP.';
-                        
-                        // Set default values if there's an error
-                        ipAddressElement.textContent = 'Error';
-                        document.getElementById('countryName').textContent = 'Error';
-                        document.getElementById('flagEmoji').textContent = 'Error';
-                        document.getElementById('city').textContent = 'Error';
-                        document.getElementById('region').textContent = 'Error';
-                        document.getElementById('isp').textContent = 'Error';
-                        document.getElementById('asn').textContent = 'Error';
-                        document.getElementById('continent').textContent = 'Error';
-                        document.getElementById('countryCode').textContent = 'Error';
-                    });
-            }
-            
-            // Initial fetch
-            fetchIPData();
-            
-            // IP search functionality
-            const ipSearch = document.getElementById('ipSearch');
-            ipSearch.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    const ip = this.value.trim();
-                    if (ip) {
-                        fetchIPData(ip);
-                    }
-                }
-            });
+            fetch('https://nyanc4tt.xyz/api/iplookup?ip=')
+                .then(response => response.json())
+                .then(ipData => {
+                    // Update IP address
+                    ipAddressElement.textContent = ipData.ip;
+                    
+                    // Update the table data
+                    const countryCode = ipData.country_code.toUpperCase();
+                    document.getElementById('countryFlag').src = 
+                        `https://surfshark.com/website/_next/public/global/flags/${countryCode}.svg`;
+                    document.getElementById('countryName').textContent = ipData.country;
+                    document.getElementById('flagEmoji').textContent = ipData.flag_emoji;
+                    document.getElementById('city').textContent = ipData.city;
+                    document.getElementById('region').textContent = ipData.region;
+                    document.getElementById('isp').textContent = ipData.isp;
+                    document.getElementById('asn').textContent = ipData.asn;
+                    document.getElementById('continent').textContent = ipData.continent;
+                    document.getElementById('countryCode').textContent = ipData.country_code;
+                    
+                    // Fetch CSV greetings data
+                    return fetch('https://q94f.glitch.me/greetings.csv')
+                        .then(response => response.text())
+                        .then(csvText => {
+                            const greetingsData = parseCSV(csvText);
+                            
+                            // Find all greetings for the country flag
+                            const countryGreetings = greetingsData.filter(
+                                item => item.flag === ipData.flag_emoji
+                            );
+                            
+                            // Select greeting
+                            let greeting = "Hello";
+                            let wavingEmoji = "👋";
+                            
+                            if (countryGreetings.length > 0) {
+                                // Pick random greeting if multiple exist
+                                const randomGreeting = countryGreetings[
+                                    Math.floor(Math.random() * countryGreetings.length)
+                                ];
+                                greeting = randomGreeting.greeting;
+                            }
+                            
+                            // Update location text with greeting and emojis
+                            const locationText = document.getElementById('locationText');
+                            locationText.innerHTML = `
+                                ${greeting} ${wavingEmoji}, 
+                                We see you are in ${ipData.city}, ${ipData.country} ${ipData.flag_emoji}
+                            `;
+                        });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('locationText').textContent = 
+                        'Hello 👋, We see you are from an unknown location';
+                    
+                    // Set default values if there's an error
+                    ipAddressElement.textContent = 'Unknown';
+                    document.getElementById('countryName').textContent = 'Unknown';
+                    document.getElementById('flagEmoji').textContent = 'Unknown';
+                    document.getElementById('city').textContent = 'Unknown';
+                    document.getElementById('region').textContent = 'Unknown';
+                    document.getElementById('isp').textContent = 'Unknown';
+                    document.getElementById('asn').textContent = 'Unknown';
+                    document.getElementById('continent').textContent = 'Unknown';
+                    document.getElementById('countryCode').textContent = 'Unknown';
+                });
         });
     </script>
 </body>
