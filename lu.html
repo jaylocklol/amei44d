@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Lookup Tool</title>
+    <style>
+        :root {
+            --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-color: #333;
+            --card-bg: white;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --table-header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --table-header-color: white;
+            --table-border: #eee;
+            --table-text: #555;
+            --input-bg: white;
+            --input-border: #ddd;
+            --button-bg: #667eea;
+            --button-hover: #5a6fd1;
+        }
+        
+        .dark-mode {
+            --bg-color: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --text-color: #f0f0f0;
+            --card-bg: #1e293b;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --table-header-bg: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            --table-header-color: #f8fafc;
+            --table-border: #334155;
+            --table-text: #e2e8f0;
+            --input-bg: #1e293b;
+            --input-border: #475569;
+            --button-bg: #4b6cb7;
+            --button-hover: #3a5aa5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background 0.5s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .search-button {
+            padding: 12px 20px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        .search-button:hover {
+            background: var(--button-hover);
+        }
+        
+        .ip-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border-radius: 12px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .ip-table th {
+            background: var(--table-header-bg);
+            color: var(--table-header-color);
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .ip-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--table-border);
+            color: var(--table-text);
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .ip-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .flag-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .flag {
+            width: 30px;
+            height: 22px;
+            border-radius: 3px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .dark-mode-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .error-message {
+            color: #e53e3e;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1-8.313-12.454z"/>
+        </svg>
+    </button>
+    
+    <div class="container">
+        <div class="search-container">
+            <input type="text" class="search-input" id="ipInput" placeholder="Enter IP address" value="8.8.8.8">
+            <button class="search-button" id="searchButton">Lookup</button>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <table class="ip-table" id="ipTable">
+            <thead>
+                <tr>
+                    <th colspan="2">IP Information</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>IP Address</td>
+                    <td id="ipAddress"></td>
+                </tr>
+                <tr>
+                    <td>Country</td>
+                    <td class="flag-container">
+                        <img id="countryFlag" class="flag" src="https://surfshark.com/website/_next/public/global/flags/US.svg" alt="Flag">
+                        <span id="countryName"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Flag Emoji</td>
+                    <td id="flagEmoji"></td>
+                </tr>
+                <tr>
+                    <td>City</td>
+                    <td id="city"></td>
+                </tr>
+                <tr>
+                    <td>Region</td>
+                    <td id="region"></td>
+                </tr>
+                <tr>
+                    <td>ISP</td>
+                    <td id="isp"></td>
+                </tr>
+                <tr>
+                    <td>ASN</td>
+                    <td id="asn"></td>
+                </tr>
+                <tr>
+                    <td>Continent</td>
+                    <td id="continent"></td>
+                </tr>
+                <tr>
+                    <td>Country Code</td>
+                    <td id="countryCode"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for dark mode preference in cookie
+            if (document.cookie.includes('darkMode=true')) {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // Set up dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                document.cookie = `darkMode=${isDarkMode}; path=/; max-age=${60 * 60 * 24 * 365}`;
+            });
+            
+            // IP lookup functionality
+            const ipInput = document.getElementById('ipInput');
+            const searchButton = document.getElementById('searchButton');
+            const ipTable = document.getElementById('ipTable');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Validate IP address
+            function isValidIP(ip) {
+                const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+                return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+            }
+            
+            // Perform IP lookup
+            function lookupIP(ip) {
+                if (!isValidIP(ip)) {
+                    errorMessage.textContent = "Please enter a valid IP address";
+                    return;
+                }
+                
+                errorMessage.textContent = "";
+                searchButton.innerHTML = '<div class="loading"></div>';
+                ipTable.style.opacity = 0;
+                
+                fetch(`https://nyanc4tt.xyz/api/iplookup?ip=${ip}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update the table with IP data
+                        document.getElementById('ipAddress').textContent = data.ip;
+                        
+                        const countryCode = data.country_code.toUpperCase();
+                        document.getElementById('countryFlag').src = 
+                            `https://surfshark.com/website/_next/public/global/flags/${countryCode}.svg`;
+                        document.getElementById('countryName').textContent = data.country;
+                        document.getElementById('flagEmoji').textContent = data.flag_emoji;
+                        document.getElementById('city').textContent = data.city;
+                        document.getElementById('region').textContent = data.region;
+                        document.getElementById('isp').textContent = data.isp;
+                        document.getElementById('asn').textContent = data.asn;
+                        document.getElementById('continent').textContent = data.continent;
+                        document.getElementById('countryCode').textContent = data.country_code;
+                        
+                        // Show table with animation
+                        ipTable.style.opacity = 0;
+                        ipTable.style.transform = 'translateY(20px)';
+                        ipTable.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching IP data:', error);
+                        errorMessage.textContent = "Failed to lookup IP address. Please try again.";
+                    })
+                    .finally(() => {
+                        searchButton.textContent = 'Lookup';
+                    });
+            }
+            
+            // Handle search button click
+            searchButton.addEventListener('click', function() {
+                lookupIP(ipInput.value.trim());
+            });
+            
+            // Handle Enter key in input field
+            ipInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    lookupIP(ipInput.value.trim());
+                }
+            });
+            
+            // Perform initial lookup with default IP
+            lookupIP(ipInput.value.trim());
+        });
+    </script>
+</body>
+</html>
